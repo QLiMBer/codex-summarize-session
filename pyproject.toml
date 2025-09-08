@@ -1,0 +1,25 @@
+[
+  "build-system"
+]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codex-summarize-session"
+version = "0.1.1"
+description = "CLI to list Codex CLI sessions and extract message lines from JSONL logs"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+  { name = "Codex User" }
+]
+keywords = ["codex", "sessions", "jsonl", "summary", "cli"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Environment :: Console",
+  "Topic :: Utilities",
+]
+
+[project.scripts]
+codex-summarize-session = "codex_summarize_session.cli:main"

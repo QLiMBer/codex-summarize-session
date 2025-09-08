@@ -1,0 +1,47 @@
+# --- Python bytecode & cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+__pypackages__/
+
+# --- Packaging / build artifacts ---
+build/
+dist/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+wheels/
+
+# --- Virtual environments ---
+.venv/
+venv/
+ENV/
+env/
+.python-version
+
+# --- Tests / coverage ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.hypothesis/
+
+# --- Type checker caches ---
+.mypy_cache/
+.pytype/
+
+# --- Logs ---
+*.log
+
+# --- Local environment / secrets ---
+.env
+.env.*
+
+# --- Editors / OS noise ---
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
