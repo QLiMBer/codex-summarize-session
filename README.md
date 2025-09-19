@@ -18,14 +18,15 @@ Features
 Install
 -------
 1. Ensure Python 3.8+ is available.
-2a. Systemwide-style (recommended for CLIs) using pipx:
-   - `pipx install .`
-   - Installs each app into its own virtual environment and exposes a single command on your PATH. Great for CLIs; avoids dependency conflicts; easy uninstall.
-2b. User-local with pip (no separate venv):
-   - `python3 -m pip install --user .`
-   - Installs into the current environment (system Python, `--user`, or a virtualenv you activated). Prefer a virtualenv or `--user`; avoid system-wide with `sudo`.
-     
-This installs the executable `codex-summarize-session` into a bin directory on your PATH (commonly `~/.local/bin`).
+2. Pick the installation style that fits your workflow:
+   - **pipx (recommended for CLIs)**
+     - `pipx install .`
+     - Keeps each CLI in its own isolated virtual environment, exposes the command on your PATH, and makes uninstalling low-risk.
+   - **pip (inside a venv or with `--user`)**
+     - `python3 -m pip install --user .`
+     - Installs into the active environment. Use `--user` or an activated virtualenv to avoid needing `sudo` and to prevent dependency conflicts.
+
+Either option installs the `codex-summarize-session` executable to a bin directory on your PATH (commonly `~/.local/bin`).
 
 Uninstall
 ---------
