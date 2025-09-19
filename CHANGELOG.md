@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 while it remains under the `0.x` line (breaking changes may still occur).
 
 ## [Unreleased]
-- Placeholder for upcoming changes. Add entries under Added/Changed/Fixed as you work.
+### Fixed
+- Ensure `extract` emits messages when they are wrapped in `response_item` payloads (adds timestamps when present).
 
 ## [0.2.0] - 2024-09-19
 ### Added

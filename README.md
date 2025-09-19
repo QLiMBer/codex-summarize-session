@@ -47,7 +47,7 @@ Iterate Without Reinstalling
   - `python codex_summarize_session/cli.py list`
   - `python -m codex_summarize_session.cli extract <session.jsonl>`
 - Editable/dev install (picks up code changes):
-  - pipx: `pipx install --editable .`
+  - pipx: `pipx install --editable . --force` (use `--force` when you need to refresh an existing pipx venv)
   - pip in a venv: `python -m venv .venv && source .venv/bin/activate && pip install -e .`
 - Ad-hoc run (no permanent install): `pipx run --spec . codex-summarize-session list`
 
@@ -96,3 +96,4 @@ Notes
 - Use `--force` to overwrite an existing output file.
 - Malformed JSON lines are skipped instead of aborting the extraction.
 - A future `summarize` command can be added to call an LLM API or a local model.
+- Extraction normalizes entries where messages are wrapped in `response_item` payloads and preserves timestamps when present.

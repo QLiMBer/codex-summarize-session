@@ -6,7 +6,7 @@
 - Session JSONL fixtures live outside the repo; the tool reads from `~/.codex/sessions` or a user-supplied directory at runtime.
 
 ## Build, Test, and Development Commands
-- Install editable locally for rapid iteration: `python -m pip install -e .` (or `pipx install --editable .`).
+- Install editable locally for rapid iteration: `python -m pip install -e .` (or `pipx install --editable . --force` when refreshing an existing pipx venv).
 - Run the CLI without installing: `python -m codex_summarize_session.cli list` or add extra args (`extract`, `--sessions-dir`, etc.).
 - No dedicated test suite yet; prefer manual smoke runs of `list` and `extract` after changes.
 

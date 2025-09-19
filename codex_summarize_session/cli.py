@@ -69,6 +69,31 @@ def extract_cwd_from_session(path: Path, max_lines: int = 200) -> Optional[str]:
     return None
 
 
+def extract_message_from_obj(obj: Any) -> Optional[dict]:
+    if not isinstance(obj, dict):
+        return None
+    if obj.get("type") == "message":
+        return obj
+    payload = obj.get("payload")
+    if isinstance(payload, dict) and payload.get("type") == "message":
+        message = dict(payload)
+        timestamp = obj.get("timestamp")
+        if timestamp is not None and "timestamp" not in message:
+            message["timestamp"] = timestamp
+        response_id = obj.get("id")
+        if response_id and "response_id" not in message:
+            message["response_id"] = response_id
+        return message
+    return None
+
+
+def iter_messages(path: Path) -> Iterable[dict]:
+    for obj in iter_jsonl(path):
+        message = extract_message_from_obj(obj)
+        if message:
+            yield message
+
+
 def list_sessions(sessions_dir: Path, limit: Optional[int] = None) -> list[Path]:
     files = sorted(
         (p for p in sessions_dir.rglob("*.jsonl") if p.is_file()),
@@ -117,10 +142,9 @@ def extract_messages(
     count = 0
 
     if to_stdout:
-        for obj in iter_jsonl(input_path):
-            if obj.get("type") == "message":
-                print(json.dumps(obj, ensure_ascii=False))
-                count += 1
+        for message in iter_messages(input_path):
+            print(json.dumps(message, ensure_ascii=False))
+            count += 1
         return count
 
     # Determine output path
@@ -136,10 +160,9 @@ def extract_messages(
 
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w", encoding="utf-8") as f:
-        for obj in iter_jsonl(input_path):
-            if obj.get("type") == "message":
-                f.write(json.dumps(obj, ensure_ascii=False) + "\n")
-                count += 1
+        for message in iter_messages(input_path):
+            f.write(json.dumps(message, ensure_ascii=False) + "\n")
+            count += 1
     return count
 
 
