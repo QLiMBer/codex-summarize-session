@@ -15,25 +15,16 @@ Features
 - Accept either a full path or just the filename present under the sessions dir.
 - Jump straight from `list` to `extract` by passing the numeric row shown in the listing.
 
-What Is a CLI?
---------------
-- Command-Line Interface: Programs run from a terminal with commands, args, and flags (e.g., `codex-summarize-session extract file.jsonl`).
-- Behavior: Parses args, does work, prints output, and returns an exit code (0 = success).
-- Entry point: Packaging maps a command name to a Python function; installers create a small launcher script that calls that function.
-
-pipx vs pip
-------------
-- pipx: Installs each app into its own virtual environment and exposes a single command on your PATH. Great for CLIs; avoids dependency conflicts; easy uninstall.
-- pip: Installs into the current environment (system Python, `--user`, or a virtualenv you activated). Prefer a virtualenv or `--user`; avoid system-wide with `sudo`.
-
 Install
 -------
 1. Ensure Python 3.8+ is available.
-2. Systemwide-style (recommended for CLIs) using pipx:
+2a. Systemwide-style (recommended for CLIs) using pipx:
    - `pipx install .`
-3. User-local with pip (no separate venv):
+   - Installs each app into its own virtual environment and exposes a single command on your PATH. Great for CLIs; avoids dependency conflicts; easy uninstall.
+2b. User-local with pip (no separate venv):
    - `python3 -m pip install --user .`
-
+   - Installs into the current environment (system Python, `--user`, or a virtualenv you activated). Prefer a virtualenv or `--user`; avoid system-wide with `sudo`.
+     
 This installs the executable `codex-summarize-session` into a bin directory on your PATH (commonly `~/.local/bin`).
 
 Uninstall
@@ -58,11 +49,9 @@ Usage
   - `codex-summarize-session list`
   - `codex-summarize-session list --limit 50`
 
-  The output includes the session path relative to the root, file size, and the captured `cwd` for quick context.
+- Extract by filepath:
 
-- Extract message lines to a file in the current directory (default):
-
-  - `codex-summarize-session extract /home/mirek/.codex/sessions/2025/09/07/rollout-2025-09-07T23-41-39-...jsonl`
+  - `codex-summarize-session extract /home/user/.codex/sessions/2025/09/07/rollout-2025-09-07T23-41-39-...jsonl`
 
 - Extract by filename (searched under the sessions dir):
 
