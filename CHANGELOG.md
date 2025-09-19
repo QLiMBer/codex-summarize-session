@@ -7,8 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 while it remains under the `0.x` line (breaking changes may still occur).
 
 ## [Unreleased]
-### Fixed
-- Ensure `extract` emits messages when they are wrapped in `response_item` payloads (adds timestamps when present).
+
 
 ## [0.2.0] - 2024-09-19
 ### Added
@@ -17,6 +16,7 @@ while it remains under the `0.x` line (breaking changes may still occur).
 
 ### Fixed
 - Repair invalid `[build-system]` table in `pyproject.toml` so editable installs succeed.
+- Ensure `extract` emits messages when they are wrapped in `response_item` payloads (adds timestamps when present).
 
 ### Documentation
 - Document new `list` output and index-based extraction in `README.md`.

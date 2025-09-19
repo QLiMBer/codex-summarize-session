@@ -5,9 +5,8 @@
 - [X] Commit and update `CHANGELOG.md`/`README.md` with latest changes.
 - [X] Build fresh artifacts with `python -m build` and run `twine check dist/*`.
 - [X] Smoke-test install from the built wheel in a clean environment.
-- [ ] Tag the release and push (`git tag vX.Y.Z && git push origin vX.Y.Z`).
-- [ ] Draft GitHub release notes (copy from `CHANGELOG.md`) and attach/mention artifacts.
-- [ ] Optional: Upload artifacts to PyPI via `twine upload dist/*`.
+- [X] Tag the release and push (`git tag vX.Y.Z && git push origin vX.Y.Z`).
+- [X] Draft GitHub release notes (copy from `CHANGELOG.md`) and attach/mention artifacts.
 
 ## Step Details
 - **Version bump**: edit `pyproject.toml` (and optionally expose `__version__`), then commit before building.
