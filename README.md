@@ -6,10 +6,12 @@ Small CLI to help browse Codex CLI session logs and extract user/assistant messa
 Features
 --------
 - List recent sessions under `~/.codex/sessions` (or a custom dir).
+- Show each session's working directory (parsed from the log) directly in the list output.
 - Extract only lines where `"type":"message"` into a new JSONL.
 - Stream to stdout or write to a file.
 - Default output path is the current working directory (not the script location).
 - Accept either a full path or just the filename present under the sessions dir.
+- Jump straight from `list` to `extract` by passing the numeric row shown in the listing.
 
 What Is a CLI?
 --------------
@@ -54,6 +56,8 @@ Usage
   - `codex-summarize-session list`
   - `codex-summarize-session list --limit 50`
 
+  The output includes the session path relative to the root, file size, and the captured `cwd` for quick context.
+
 - Extract message lines to a file in the current directory (default):
 
   - `codex-summarize-session extract /home/mirek/.codex/sessions/2025/09/07/rollout-2025-09-07T23-41-39-...jsonl`
@@ -61,6 +65,10 @@ Usage
 - Extract by filename (searched under the sessions dir):
 
   - `codex-summarize-session extract rollout-2025-09-07T23-41-39-...jsonl`
+
+- Extract by list index (uses the same ordering as `list`):
+
+  - `codex-summarize-session extract 3`
 
 - Stream extracted lines to stdout:
 

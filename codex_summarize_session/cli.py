@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Any, Iterable, Optional
 
 
 def get_default_sessions_dir() -> Path:
@@ -24,6 +23,52 @@ def iter_jsonl(path: Path) -> Iterable[dict]:
                 continue
 
 
+def extract_cwd_from_text(text: str) -> Optional[str]:
+    start_tag = "<cwd>"
+    end_tag = "</cwd>"
+    start = text.find(start_tag)
+    if start == -1:
+        return None
+    start += len(start_tag)
+    end = text.find(end_tag, start)
+    if end == -1:
+        return None
+    return text[start:end].strip()
+
+
+def extract_cwd_from_obj(obj: Any) -> Optional[str]:
+    stack = [obj]
+    while stack:
+        current = stack.pop()
+        if isinstance(current, str):
+            cwd = extract_cwd_from_text(current)
+            if cwd:
+                return cwd
+        elif isinstance(current, dict):
+            text = current.get("text")
+            if isinstance(text, str):
+                cwd = extract_cwd_from_text(text)
+                if cwd:
+                    return cwd
+            for key, value in current.items():
+                if key == "text":
+                    continue
+                stack.append(value)
+        elif isinstance(current, (list, tuple)):
+            stack.extend(current)
+    return None
+
+
+def extract_cwd_from_session(path: Path, max_lines: int = 200) -> Optional[str]:
+    for index, obj in enumerate(iter_jsonl(path)):
+        cwd = extract_cwd_from_obj(obj)
+        if cwd:
+            return cwd
+        if index + 1 >= max_lines:
+            break
+    return None
+
+
 def list_sessions(sessions_dir: Path, limit: Optional[int] = None) -> list[Path]:
     files = sorted(
         (p for p in sessions_dir.rglob("*.jsonl") if p.is_file()),
@@ -34,6 +79,18 @@ def list_sessions(sessions_dir: Path, limit: Optional[int] = None) -> list[Path]
 
 
 def resolve_session_path(candidate: str, sessions_dir: Path) -> Path:
+    stripped = candidate.strip()
+    if stripped.isdigit():
+        files = list_sessions(sessions_dir)
+        if not files:
+            raise FileNotFoundError(f"No session files found under {sessions_dir}")
+        index = int(stripped)
+        if not 1 <= index <= len(files):
+            raise FileNotFoundError(
+                f"Session index {index} out of range (1..{len(files)})."
+            )
+        return files[index - 1]
+
     p = Path(candidate).expanduser()
     if p.exists():
         return p
@@ -132,14 +189,36 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     if args.cmd == "list":
         files = list_sessions(sessions_dir, limit=args.limit)
+        base_label = str(sessions_dir)
+        if files:
+            print(f"Sessions under {base_label}")
+        else:
+            print(f"No session files found under {base_label}")
+        entries = []
         for i, p in enumerate(files, start=1):
-            # Show size and mtime briefly
             try:
                 st = p.stat()
                 size = st.st_size
             except OSError:
                 size = 0
-            print(f"{i:3d}. {p} ({size} bytes)")
+            try:
+                relative = p.relative_to(sessions_dir)
+                display_path = relative.as_posix()
+            except ValueError:
+                display_path = str(p)
+            size_str = f"{size:,}".replace(",", " ")
+            cwd = extract_cwd_from_session(p)
+            cwd_display = cwd if cwd else "?"
+            prefix = f"{i:3d}. {display_path}"
+            entries.append((prefix, size_str, cwd_display))
+
+        if entries:
+            prefix_width = max(len(prefix) for prefix, _, _ in entries)
+            size_width = max(len(size_str) for _, size_str, _ in entries)
+            for prefix, size_str, cwd_display in entries:
+                print(
+                    f"{prefix.ljust(prefix_width)}  {size_str.rjust(size_width)} B  cwd: {cwd_display}"
+                )
         return 0
 
     if args.cmd == "extract":
