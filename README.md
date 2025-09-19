@@ -3,6 +3,8 @@ codex-summarize-session
 
 Small CLI to help browse Codex CLI session logs and extract user/assistant messages from JSONL files for later summarization.
 
+Current version: `0.2.0` (see `CHANGELOG.md` for details).
+
 Features
 --------
 - List recent sessions under `~/.codex/sessions` (or a custom dir).
