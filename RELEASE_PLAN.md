@@ -1,12 +1,12 @@
 # Release Prep Checklist
 
 ## Quick TODO
-- [X] Update `pyproject.toml` version when ready.
-- [X] Commit and update `CHANGELOG.md`/`README.md` with latest changes.
-- [X] Build fresh artifacts with `python -m build` and run `twine check dist/*`.
-- [X] Smoke-test install from the built wheel in a clean environment.
-- [X] Tag the release and push (`git tag vX.Y.Z && git push origin vX.Y.Z`).
-- [X] Draft GitHub release notes (copy from `CHANGELOG.md`) and attach/mention artifacts.
+- [] Update `pyproject.toml` version when ready.
+- [] Commit and update `CHANGELOG.md`/`README.md` with latest changes.
+- [] Build fresh artifacts with `python -m build` and run `twine check dist/*`.
+- [] Smoke-test install from the built wheel in a clean environment.
+- [] Tag the release and push (`git tag vX.Y.Z && git push origin vX.Y.Z`).
+- [] Draft GitHub release notes (copy from `CHANGELOG.md`) and attach/mention artifacts.
 
 ## Step Details
 - **Version bump**: edit `pyproject.toml` (and optionally expose `__version__`), then commit before building.
