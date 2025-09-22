@@ -25,9 +25,9 @@ There is no PyPI package yet—install directly from this repository.
 2. `cd codex-summarize-session`
 3. Pick your install style:
    - **pip (current environment)**
-     - Standard CLI: `python -m pip install .`
-     - With interactive browser: `python -m pip install .[browser]`
-     - Editable: add `-e`, e.g. `python -m pip install -e .[browser]`
+     - Standard CLI: `pip install .`
+     - With interactive browser: `pip install .[browser]`
+     - Editable: add `-e`, e.g. `pip install -e .[browser]`
    - **pipx (isolated venv)**
      - Standard CLI: `pipx install .`
      - With interactive browser: `pipx install .[browser]`
@@ -44,6 +44,9 @@ Uninstall
 
 Iterate Without Reinstalling
 ----------------------------
+- Editable installation
+  - `pip install -e .[browser]`
+  - `pipx install --editable .[browser]`
 - Run directly without install:
   - `python codex_summarize_session/cli.py list`
   - `python -m codex_summarize_session.cli extract <session.jsonl>`
