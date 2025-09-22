@@ -1,7 +1,6 @@
 # Roadmap & Ideas
 
 ## Future Improvements
-- Interactive session browser (arrow-key navigation, search filters).
 - Selection using pressing numbers, writing particular multi-digits IDs
 - additional details (maybe including first few messages iot give use a hint?)
   - when selection using arrows
@@ -11,6 +10,9 @@
 - Sessions filtering
   - recent
   - selected date span
+  - cwd based
+
+- Test various ways of install, [browser] version with dependency in particular.
 
 - Add automated tests covering message extraction, especially nested `response_item` payloads.
 
@@ -24,3 +26,6 @@
 ## Open Questions
 - Should the interactive `SessionBrowser` live in its own module long term, or should shared helpers migrate elsewhere as more TUI features arrive?
 - How do we want to verify both dependency setups (with/without `[browser]`) before release, and are the docs clear on that workflow?
+
+## Development Notes
+- Test both dependency setups when iterating on the browser: run once with `prompt_toolkit` installed (`python -m pip install .[browser]` or `pipx inject codex-summarize-session prompt_toolkit`) and again after uninstalling it (`python -m pip uninstall prompt_toolkit`) to ensure the CLI’s guidance for missing extras stays accurate.

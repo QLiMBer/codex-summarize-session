@@ -297,7 +297,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             if exc.name == "prompt_toolkit":
                 parser.error(
                     "Interactive browsing requires optional dependency 'prompt_toolkit'. "
-                    "Install with `pip install codex-summarize-session[browser]`."
+                    "Install it from the repo with `python -m pip install .[browser]` "
+                    "(or `pipx inject codex-summarize-session prompt_toolkit`)."
                 )
             raise
 

@@ -18,35 +18,35 @@ Features
 
 Install
 -------
-1. Ensure Python 3.8+ is available.
-2. Pick the installation style that fits your workflow:
-   - **pipx (recommended for CLIs)**
-     - `pipx install .`
-     - Keeps each CLI in its own isolated virtual environment, exposes the command on your PATH, and makes uninstalling low-risk.
-   - **pip (inside a venv or with `--user`)**
-     - `python3 -m pip install --user .`
-     - Installs into the active environment. Use `--user` or an activated virtualenv to avoid needing `sudo` and to prevent dependency conflicts.
+There is no PyPI package yet—install directly from this repository.
 
-3. Want the interactive browser? Install the optional extra that pulls in `prompt_toolkit`:
-   - PyPI/package install: `python -m pip install codex-summarize-session[browser]`
-   - From a local checkout: `python -m pip install .[browser]`
-   - pipx users can inject the dependency after installing the CLI: `pipx inject codex-summarize-session prompt_toolkit`
+### Install from this repo
+1. `git clone git@github.com:QLiMBer/codex-summarize-session.git`
+2. `cd codex-summarize-session`
+3. Pick your install style:
+   - **pip (current environment)**
+     - Standard CLI: `python -m pip install .`
+     - With interactive browser: `python -m pip install .[browser]`
+     - Editable: add `-e`, e.g. `python -m pip install -e .[browser]`
+   - **pipx (isolated venv)**
+     - Standard CLI: `pipx install .`
+     - With interactive browser: `pipx install .[browser]`
+     - Editable: `pipx install --editable .[browser]` (use `--force` when refreshing an existing install)
 
-Either option installs the `codex-summarize-session` executable to a bin directory on your PATH (commonly `~/.local/bin`).
+Either approach drops the `codex-summarize-session` entrypoint on your PATH (often `~/.local/bin` or the active virtualenv).
 
 Uninstall
 ---------
 - pipx: `pipx uninstall codex-summarize-session`
 - pip: `pip uninstall codex-summarize-session`
+  - prompt_toolkit: it is not automatically uninstalled
+  - you can manually uninstall it using `pip uninstall prompt_toolkit`
 
 Iterate Without Reinstalling
 ----------------------------
 - Run directly without install:
   - `python codex_summarize_session/cli.py list`
   - `python -m codex_summarize_session.cli extract <session.jsonl>`
-- Editable/dev install (picks up code changes):
-  - pipx: `pipx install --editable . --force` (use `--force` when you need to refresh an existing pipx venv)
-  - pip in a venv: `python -m venv .venv && source .venv/bin/activate && pip install -e .`
 - Ad-hoc run (no permanent install): `pipx run --spec . codex-summarize-session list`
 
 Usage
@@ -104,3 +104,5 @@ Notes
 Development Notes
 -----------------
 - Test both dependency setups when iterating on the browser: run once with `prompt_toolkit` installed (`python -m pip install .[browser]` or `pipx inject codex-summarize-session prompt_toolkit`) and again after uninstalling it (`python -m pip uninstall prompt_toolkit`) to ensure the CLI’s guidance for missing extras stays accurate.
+- If you keep both a pip and pipx install, whichever `codex-summarize-session` appears first on `PATH` wins. Run `which codex-summarize-session` to confirm, or uninstall one copy before testing changes.
+- After changing installs, run `hash -r` (or open a new shell) so Bash forgets cached command locations; otherwise it might still call a removed shim.
