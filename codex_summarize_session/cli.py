@@ -3,7 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Optional, Sequence
+from dataclasses import dataclass
 
 
 def get_default_sessions_dir() -> Path:
@@ -103,6 +104,62 @@ def list_sessions(sessions_dir: Path, limit: Optional[int] = None) -> list[Path]
     return files[:limit] if limit else files
 
 
+@dataclass
+class SessionEntry:
+    index: int
+    path: Path
+    display_label: str
+    size_bytes: int
+    cwd: Optional[str]
+
+    @property
+    def size_display(self) -> str:
+        return f"{self.size_bytes:,}".replace(",", " ")
+
+    @property
+    def cwd_display(self) -> str:
+        return self.cwd if self.cwd else "?"
+
+
+def build_session_entries(
+    paths: Sequence[Path], sessions_dir: Path
+) -> list[SessionEntry]:
+    entries: list[SessionEntry] = []
+    for index, path in enumerate(paths, start=1):
+        try:
+            size = path.stat().st_size
+        except OSError:
+            size = 0
+        try:
+            display_path = path.relative_to(sessions_dir).as_posix()
+        except ValueError:
+            display_path = str(path)
+        cwd = extract_cwd_from_session(path)
+        entries.append(
+            SessionEntry(
+                index=index,
+                path=path,
+                display_label=f"{index:3d}. {display_path}",
+                size_bytes=size,
+                cwd=cwd,
+            )
+        )
+    return entries
+
+
+def format_session_entry_lines(entries: Sequence[SessionEntry]) -> list[str]:
+    if not entries:
+        return []
+    prefix_width = max(len(entry.display_label) for entry in entries)
+    size_width = max(len(entry.size_display) for entry in entries)
+    lines = []
+    for entry in entries:
+        lines.append(
+            f"{entry.display_label.ljust(prefix_width)}  {entry.size_display.rjust(size_width)} B  cwd: {entry.cwd_display}"
+        )
+    return lines
+
+
 def resolve_session_path(candidate: str, sessions_dir: Path) -> Path:
     stripped = candidate.strip()
     if stripped.isdigit():
@@ -183,6 +240,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_list = sub.add_parser("list", help="List recent session JSONL files")
     p_list.add_argument("--limit", type=int, default=20, help="Limit number of entries (default: 20)")
 
+    p_browse = sub.add_parser("browse", help="Interactively browse session JSONL files")
+    p_browse.add_argument("--limit", type=int, default=20, help="Limit number of entries (default: 20)")
+
     p_extract = sub.add_parser("extract", help="Extract only 'type=message' lines to a JSONL file")
     p_extract.add_argument("input", help="Path or filename of the session JSONL")
     p_extract.add_argument(
@@ -211,38 +271,37 @@ def main(argv: Optional[list[str]] = None) -> int:
         parser.error(f"Sessions dir does not exist: {sessions_dir}")
 
     if args.cmd == "list":
-        files = list_sessions(sessions_dir, limit=args.limit)
+        paths = list_sessions(sessions_dir, limit=args.limit)
         base_label = str(sessions_dir)
-        if files:
+        if paths:
             print(f"Sessions under {base_label}")
         else:
             print(f"No session files found under {base_label}")
-        entries = []
-        for i, p in enumerate(files, start=1):
-            try:
-                st = p.stat()
-                size = st.st_size
-            except OSError:
-                size = 0
-            try:
-                relative = p.relative_to(sessions_dir)
-                display_path = relative.as_posix()
-            except ValueError:
-                display_path = str(p)
-            size_str = f"{size:,}".replace(",", " ")
-            cwd = extract_cwd_from_session(p)
-            cwd_display = cwd if cwd else "?"
-            prefix = f"{i:3d}. {display_path}"
-            entries.append((prefix, size_str, cwd_display))
 
-        if entries:
-            prefix_width = max(len(prefix) for prefix, _, _ in entries)
-            size_width = max(len(size_str) for _, size_str, _ in entries)
-            for prefix, size_str, cwd_display in entries:
-                print(
-                    f"{prefix.ljust(prefix_width)}  {size_str.rjust(size_width)} B  cwd: {cwd_display}"
-                )
+        entries = build_session_entries(paths, sessions_dir)
+        for line in format_session_entry_lines(entries):
+            print(line)
         return 0
+
+    if args.cmd == "browse":
+        paths = list_sessions(sessions_dir, limit=args.limit)
+        base_label = str(sessions_dir)
+        if not paths:
+            print(f"No session files found under {base_label}")
+            return 0
+
+        entries = build_session_entries(paths, sessions_dir)
+        try:
+            from .browser import browse_sessions
+        except ModuleNotFoundError as exc:
+            if exc.name == "prompt_toolkit":
+                parser.error(
+                    "Interactive browsing requires optional dependency 'prompt_toolkit'. "
+                    "Install with `pip install codex-summarize-session[browser]`."
+                )
+            raise
+
+        return browse_sessions(entries, sessions_dir)
 
     if args.cmd == "extract":
         if args.output and args.output_dir:

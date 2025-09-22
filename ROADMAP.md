@@ -8,6 +8,10 @@
   - keyboard shortcut / menu
 - Find (and summarize) the relevant previous sessions (based on cwd)?
 
+- Sessions filtering
+  - recent
+  - selected date span
+
 - Add automated tests covering message extraction, especially nested `response_item` payloads.
 
 
@@ -16,3 +20,7 @@
   - Prepare PyPI metadata (project description, classifiers) and generate an API token.
   - Rehearse on TestPyPI (`twine upload --repository testpypi dist/*`) before pushing to the main index.
   - After publishing, verify with `pip install codex-summarize-session==<version>` in a fresh environment.
+
+## Open Questions
+- Should the interactive `SessionBrowser` live in its own module long term, or should shared helpers migrate elsewhere as more TUI features arrive?
+- How do we want to verify both dependency setups (with/without `[browser]`) before release, and are the docs clear on that workflow?

@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 while it remains under the `0.x` line (breaking changes may still occur).
 
 ## [Unreleased]
+### Added
+- Optional `[browser]` extra that provides `prompt_toolkit` support for the new interactive session browser.
+- `codex-summarize-session browse` command with arrow-key navigation and in-place message extraction.
 
+### Documentation
+- Describe the interactive browser workflow and optional dependency in `README.md`.
 
 ## [0.2.0] - 2024-09-19
 ### Added
