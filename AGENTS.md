@@ -6,9 +6,12 @@
 - Session JSONL fixtures live outside the repo; the tool reads from `~/.codex/sessions` or a user-supplied directory at runtime.
 
 ## Build, Test, and Development Commands
-- Install editable locally for rapid iteration: `python -m pip install -e .` (or `pipx install --editable . --force` when refreshing an existing pipx venv).
+- Install locally from the repo (no PyPI package yet):
+  - Users: `python -m pip install .` or include the interactive extra with `python -m pip install .[browser]`.
+  - Developers: `python -m pip install -e .[browser]` for editable work, or `pipx install --editable .` followed by `pipx inject codex-summarize-session prompt_toolkit`.
 - Run the CLI without installing: `python -m codex_summarize_session.cli list` or add extra args (`extract`, `--sessions-dir`, etc.).
-- No dedicated test suite yet; prefer manual smoke runs of `list` and `extract` after changes.
+- No dedicated test suite yet; prefer manual smoke runs of `list`, `extract`, and `browse` after changes.
+- After switching between pip/pipx installs, run `hash -r` so Bash refreshes cached command paths before re-testing.
 
 ## Coding Style & Naming Conventions
 - Python 3.8+ code; follow PEP 8 with 4-space indentation and descriptive, lowercase variable names.

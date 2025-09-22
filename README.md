@@ -14,33 +14,42 @@ Features
 - Default output path is the current working directory (not the script location).
 - Accept either a full path or just the filename present under the sessions dir.
 - Jump straight from `list` to `extract` by passing the numeric row shown in the listing.
+- Optional interactive browser (`browse` subcommand) with arrow-key navigation.
 
 Install
 -------
-1. Ensure Python 3.8+ is available.
-2. Pick the installation style that fits your workflow:
-   - **pipx (recommended for CLIs)**
-     - `pipx install .`
-     - Keeps each CLI in its own isolated virtual environment, exposes the command on your PATH, and makes uninstalling low-risk.
-   - **pip (inside a venv or with `--user`)**
-     - `python3 -m pip install --user .`
-     - Installs into the active environment. Use `--user` or an activated virtualenv to avoid needing `sudo` and to prevent dependency conflicts.
+There is no PyPI package yet—install directly from this repository.
 
-Either option installs the `codex-summarize-session` executable to a bin directory on your PATH (commonly `~/.local/bin`).
+### Install from this repo
+1. `git clone git@github.com:QLiMBer/codex-summarize-session.git`
+2. `cd codex-summarize-session`
+3. Pick your install style:
+   - **pip (current environment)**
+     - Standard CLI: `pip install .`
+     - With interactive browser: `pip install .[browser]`
+     - Editable: add `-e`, e.g. `pip install -e .[browser]`
+   - **pipx (isolated venv)**
+     - Standard CLI: `pipx install .`
+     - With interactive browser: `pipx install .[browser]`
+     - Editable: `pipx install --editable .[browser]` (use `--force` when refreshing an existing install)
+
+Either approach drops the `codex-summarize-session` entrypoint on your PATH (often `~/.local/bin` or the active virtualenv).
 
 Uninstall
 ---------
 - pipx: `pipx uninstall codex-summarize-session`
 - pip: `pip uninstall codex-summarize-session`
+  - prompt_toolkit: it is not automatically uninstalled
+  - you can manually uninstall it using `pip uninstall prompt_toolkit`
 
 Iterate Without Reinstalling
 ----------------------------
+- Editable installation
+  - `pip install -e .[browser]`
+  - `pipx install --editable .[browser]`
 - Run directly without install:
   - `python codex_summarize_session/cli.py list`
   - `python -m codex_summarize_session.cli extract <session.jsonl>`
-- Editable/dev install (picks up code changes):
-  - pipx: `pipx install --editable . --force` (use `--force` when you need to refresh an existing pipx venv)
-  - pip in a venv: `python -m venv .venv && source .venv/bin/activate && pip install -e .`
 - Ad-hoc run (no permanent install): `pipx run --spec . codex-summarize-session list`
 
 Usage
@@ -49,6 +58,11 @@ Usage
 
   - `codex-summarize-session list`
   - `codex-summarize-session list --limit 50`
+
+- Browse interactively (requires the optional `[browser]` extra):
+
+  - `codex-summarize-session browse`
+  - `codex-summarize-session browse --limit 50`
 
 - Extract by filepath:
 
@@ -87,3 +101,11 @@ Notes
 - Malformed JSON lines are skipped instead of aborting the extraction.
 - A future `summarize` command can be added to call an LLM API or a local model.
 - Extraction normalizes entries where messages are wrapped in `response_item` payloads and preserves timestamps when present.
+- The `browse` command will prompt for a destination path (pre-filled with a sensible default). Press `Ctrl+C` to cancel.
+- When `prompt_toolkit` is missing, the CLI suggests installing the optional `[browser]` extra before launching the interactive mode.
+
+Development Notes
+-----------------
+- Test both dependency setups when iterating on the browser: run once with `prompt_toolkit` installed (`python -m pip install .[browser]` or `pipx inject codex-summarize-session prompt_toolkit`) and again after uninstalling it (`python -m pip uninstall prompt_toolkit`) to ensure the CLI’s guidance for missing extras stays accurate.
+- If you keep both a pip and pipx install, whichever `codex-summarize-session` appears first on `PATH` wins. Run `which codex-summarize-session` to confirm, or uninstall one copy before testing changes.
+- After changing installs, run `hash -r` (or open a new shell) so Bash forgets cached command locations; otherwise it might still call a removed shim.

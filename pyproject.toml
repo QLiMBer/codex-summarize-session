@@ -21,3 +21,8 @@ classifiers = [
 
 [project.scripts]
 codex-summarize-session = "codex_summarize_session.cli:main"
+
+[project.optional-dependencies]
+browser = [
+  "prompt_toolkit>=3.0,<4"
+]
