@@ -6,13 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 while it remains under the `0.x` line (breaking changes may still occur).
 
-## [Unreleased]
+## [0.3.0] - 2024-09-22
 ### Added
 - Optional `[browser]` extra that provides `prompt_toolkit` support for the new interactive session browser.
 - `codex-summarize-session browse` command with arrow-key navigation and in-place message extraction.
 
 ### Documentation
 - Describe the interactive browser workflow and optional dependency in `README.md`.
+- Clarify pip/pipx install flows, editable modes, and dependency messaging for the interactive browser.
 
 ## [0.2.0] - 2024-09-19
 ### Added
