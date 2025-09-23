@@ -35,6 +35,13 @@ There is no PyPI package yet—install directly from this repository.
 
 Either approach drops the `codex-summarize-session` entrypoint on your PATH (often `~/.local/bin` or the active virtualenv).
 
+### Configure OpenRouter access (summaries preview)
+- Export an API key via `OPENROUTER_API_KEY=<token>` before running summary commands; we read it on every invocation so you can scope it per shell.
+- Optionally store the key at `~/.config/openrouter/key` (one line, no quotes). The CLI checks `OPENROUTER_API_KEY` first, then this file, so you can keep the variable unset in scripts.
+- Set `OPENROUTER_API_BASE` if you need to target a self-hosted proxy; otherwise the default public endpoint is used.
+- Keep tokens out of version control—`codex-summarize-session` only reads the key and never writes back to that file.
+- When the key is missing we will gate the upcoming `summaries` commands/browse shortcuts with a clear error so it’s safe to install ahead of configuration.
+
 Uninstall
 ---------
 - pipx: `pipx uninstall codex-summarize-session`
@@ -63,6 +70,12 @@ Usage
 
   - `codex-summarize-session browse`
   - `codex-summarize-session browse --limit 50`
+
+- Generate AI summaries (requires OpenRouter API access):
+
+  - `codex-summarize-session summaries generate 1`
+  - `codex-summarize-session summaries generate ~/.codex/sessions/example.jsonl --model x-ai/grok-4-fast:free`
+  - `codex-summarize-session summaries generate 1 --stdout --strip-metadata`
 
 - Extract by filepath:
 
@@ -99,7 +112,7 @@ Notes
 - If you pass `--output`, that exact file path is used.
 - Use `--force` to overwrite an existing output file.
 - Malformed JSON lines are skipped instead of aborting the extraction.
-- A future `summarize` command can be added to call an LLM API or a local model.
+- The `summaries generate` command caches Markdown output under `~/.codex/summaries/<session>/<variant>/summary.md` and the cleaned transcript alongside it as `summary.messages.jsonl`, so repeat runs avoid additional API spend.
 - Extraction normalizes entries where messages are wrapped in `response_item` payloads and preserves timestamps when present.
 - The `browse` command will prompt for a destination path (pre-filled with a sensible default). Press `Ctrl+C` to cancel.
 - When `prompt_toolkit` is missing, the CLI suggests installing the optional `[browser]` extra before launching the interactive mode.

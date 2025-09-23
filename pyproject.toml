@@ -18,6 +18,10 @@ classifiers = [
   "Environment :: Console",
   "Topic :: Utilities",
 ]
+dependencies = [
+  "PyYAML>=6.0",
+  "httpx>=0.27,<1"
+]
 
 [project.scripts]
 codex-summarize-session = "codex_summarize_session.cli:main"
