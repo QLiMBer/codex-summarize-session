@@ -30,6 +30,26 @@ class SummaryPathResolver:
         _ = model  # retained for signature compatibility; model tracked via metadata.
         return self.summary_root / relative_dir / prompt_slug / _DEFAULT_SUMMARY_FILENAME
 
+    def summary_dir_for(self, session_path: Path) -> Path:
+        """Return the directory containing cached summaries for the session."""
+        session_path = Path(session_path).expanduser().resolve()
+        relative_dir = self._relative_source_dir(session_path)
+        return self.summary_root / relative_dir
+
+    def cached_variants_for(self, session_path: Path) -> Dict[str, Path]:
+        """Return a mapping of cached prompt variants to their markdown paths."""
+        summary_dir = self.summary_dir_for(session_path)
+        variants: Dict[str, Path] = {}
+        if not summary_dir.is_dir():
+            return variants
+        for child in sorted(summary_dir.iterdir(), key=lambda p: p.name):
+            if not child.is_dir():
+                continue
+            summary_path = child / _DEFAULT_SUMMARY_FILENAME
+            if summary_path.is_file():
+                variants[child.name] = summary_path
+        return variants
+
     def index_path_for(self, session_path: Path) -> Path:
         """Return the JSONL index path used to list cached variants."""
         session_path = Path(session_path).expanduser().resolve()

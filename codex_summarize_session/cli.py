@@ -5,7 +5,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Iterable, Optional, Sequence
+from typing import Any, Iterable, Mapping, Optional, Sequence
 from dataclasses import dataclass
 
 from .messages import iter_jsonl, iter_messages, write_messages_jsonl
@@ -20,6 +20,7 @@ from .summaries import (
     SummaryService,
     TransientError,
 )
+from .summaries.storage import SummaryPathResolver
 
 
 def get_default_sessions_dir() -> Path:
@@ -235,7 +236,7 @@ def list_sessions(sessions_dir: Path, limit: Optional[int] = None) -> list[Path]
 class SessionEntry:
     index: int
     path: Path
-    display_label: str
+    display_path: str
     size_bytes: int
     cwd: Optional[str]
 
@@ -246,6 +247,17 @@ class SessionEntry:
     @property
     def cwd_display(self) -> str:
         return self.cwd if self.cwd else "?"
+
+
+@dataclass
+class BrowseSummaryOptions:
+    summaries_dir: Path
+    prompt_variant: str
+    prompt_path: Optional[Path]
+    model: str
+    temperature: float
+    max_tokens: Optional[int]
+    reasoning_effort: Optional[str]
 
 
 def build_session_entries(
@@ -266,7 +278,7 @@ def build_session_entries(
             SessionEntry(
                 index=index,
                 path=path,
-                display_label=f"{index:3d}. {display_path}",
+                display_path=display_path,
                 size_bytes=size,
                 cwd=cwd,
             )
@@ -274,17 +286,60 @@ def build_session_entries(
     return entries
 
 
-def format_session_entry_lines(entries: Sequence[SessionEntry]) -> list[str]:
+def format_session_table(
+    entries: Sequence[SessionEntry],
+    summary_counts: Optional[Mapping[Path, int]] = None,
+) -> tuple[str, list[str]]:
     if not entries:
-        return []
-    prefix_width = max(len(entry.display_label) for entry in entries)
-    size_width = max(len(entry.size_display) for entry in entries)
-    lines = []
+        header = "Idx  Path  Bytes  CWD  Summaries"
+        return header, []
+
+    index_width = max(len("Idx"), max(len(str(entry.index)) for entry in entries))
+    path_width = max(len("Path"), max(len(entry.display_path) for entry in entries))
+    bytes_width = max(len("Bytes"), max(len(entry.size_display) for entry in entries))
+    cwd_width = max(len("CWD"), max(len(entry.cwd_display) for entry in entries))
+
+    summary_labels: list[str] = []
     for entry in entries:
-        lines.append(
-            f"{entry.display_label.ljust(prefix_width)}  {entry.size_display.rjust(size_width)} B  cwd: {entry.cwd_display}"
+        if summary_counts is None:
+            summary_labels.append("?")
+        else:
+            count = summary_counts.get(entry.path, 0)
+            summary_labels.append(str(count))
+    summaries_width = max(len("Summaries"), max(len(label) for label in summary_labels) if summary_labels else len("Summaries"))
+
+    header = (
+        f"{'Idx'.rjust(index_width)}  "
+        f"{'Path'.ljust(path_width)}  "
+        f"{'Bytes'.rjust(bytes_width)}  "
+        f"{'CWD'.ljust(cwd_width)}  "
+        f"{'Summaries'.rjust(summaries_width)}"
+    )
+
+    lines: list[str] = []
+    for entry, summary_label in zip(entries, summary_labels):
+        line = (
+            f"{str(entry.index).rjust(index_width)}  "
+            f"{entry.display_path.ljust(path_width)}  "
+            f"{entry.size_display.rjust(bytes_width)}  "
+            f"{entry.cwd_display.ljust(cwd_width)}  "
+            f"{summary_label.rjust(summaries_width)}"
         )
-    return lines
+        lines.append(line)
+    return header, lines
+
+
+def build_summary_counts(
+    entries: Sequence[SessionEntry],
+    summaries_dir: Path,
+    sessions_dir: Path,
+) -> dict[Path, int]:
+    resolver = SummaryPathResolver(summaries_dir.expanduser(), sessions_dir.expanduser())
+    counts: dict[Path, int] = {}
+    for entry in entries:
+        variants = resolver.cached_variants_for(entry.path)
+        counts[entry.path] = len(variants)
+    return counts
 
 
 def resolve_session_path(candidate: str, sessions_dir: Path) -> Path:
@@ -362,6 +417,43 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_browse = sub.add_parser("browse", help="Interactively browse session JSONL files")
     p_browse.add_argument("--limit", type=int, default=20, help="Limit number of entries (default: 20)")
+    p_browse.add_argument(
+        "--summaries-dir",
+        type=Path,
+        help="Directory to store cached summaries used by browse mode (default: ~/.codex/summaries)",
+    )
+    p_browse.add_argument(
+        "--summary-prompt",
+        default="default",
+        help="Prompt preset to load when generating summaries interactively (default: default)",
+    )
+    p_browse.add_argument(
+        "--summary-prompt-path",
+        type=Path,
+        help="Explicit path to a prompt template file used instead of --summary-prompt",
+    )
+    p_browse.add_argument(
+        "--summary-model",
+        default="x-ai/grok-4-fast:free",
+        help="OpenRouter model identifier to use for interactive summaries (default: x-ai/grok-4-fast:free)",
+    )
+    p_browse.add_argument(
+        "--summary-temperature",
+        type=float,
+        default=0.2,
+        help="Sampling temperature applied when generating summaries (default: 0.2)",
+    )
+    p_browse.add_argument(
+        "--summary-max-tokens",
+        type=int,
+        help="Optional cap for completion tokens during interactive summarisation",
+    )
+    p_browse.add_argument(
+        "--summary-reasoning-effort",
+        choices=["low", "medium", "high", "none"],
+        default="medium",
+        help="Reasoning effort hint when supported by the chosen model (default: medium)",
+    )
 
     p_extract = sub.add_parser("extract", help="Extract only 'type=message' lines to a JSONL file")
     p_extract.add_argument("input", help="Path or filename of the session JSONL")
@@ -463,8 +555,16 @@ def main(argv: Optional[list[str]] = None) -> int:
             print(f"No session files found under {base_label}")
 
         entries = build_session_entries(paths, sessions_dir)
-        for line in format_session_entry_lines(entries):
-            print(line)
+        if entries:
+            summary_counts = build_summary_counts(
+                entries,
+                get_default_summaries_dir(),
+                sessions_dir,
+            )
+            header, lines = format_session_table(entries, summary_counts)
+            print(header)
+            for line in lines:
+                print(line)
         return 0
 
     if args.cmd == "browse":
@@ -475,6 +575,17 @@ def main(argv: Optional[list[str]] = None) -> int:
             return 0
 
         entries = build_session_entries(paths, sessions_dir)
+        summary_options = BrowseSummaryOptions(
+            summaries_dir=(args.summaries_dir or get_default_summaries_dir()).expanduser(),
+            prompt_variant=args.summary_prompt,
+            prompt_path=args.summary_prompt_path.expanduser()
+            if args.summary_prompt_path
+            else None,
+            model=args.summary_model,
+            temperature=args.summary_temperature,
+            max_tokens=args.summary_max_tokens,
+            reasoning_effort=normalize_reasoning_effort(args.summary_reasoning_effort),
+        )
         try:
             from .browser import browse_sessions
         except ModuleNotFoundError as exc:
@@ -486,7 +597,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                 )
             raise
 
-        return browse_sessions(entries, sessions_dir)
+        return browse_sessions(entries, sessions_dir, summary_options)
 
     if args.cmd == "extract":
         if args.output and args.output_dir:

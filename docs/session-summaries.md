@@ -67,10 +67,10 @@
 - When caching summaries, include the cost information so users can gauge savings from cache hits.
 
 ## Next Steps
-1. Revisit Phase 5 with the refined TUI requirements above, ensuring we validate UI refresh behavior after summary generation before moving on.
-2. Capture usability notes during implementation (status messaging, pager ergonomics) and roll them into README/help text updates once the feature stabilizes.
-3. Once Phase 5 lands, resume Phase 6 indexing work to expose variant listings in both CLI and TUI.
-4. Keep the OpenRouter analysis doc updated with any retry/backoff adjustments discovered while wiring the TUI workflows.
+1. Capture any lingering usability findings from the new browse keybindings (status clarity, pager ergonomics) and track follow-up tweaks here.
+2. Move on to Phase 6 indexing work to surface cached variants via dedicated CLI/TUI commands and reuse the newly added resolver helpers.
+3. Add a new keybinding to `e`, which extracts existing summary to MD file, without metadata. Also add this functionality to CLI.
+4. Keep the OpenRouter analysis doc updated with retry/backoff adjustments observed during manual testing.
 
 ## Implementation Plan
 
@@ -104,12 +104,12 @@
 - [x] Update `--help` text and README usage examples, highlighting how cache hits reduce cost, where summaries are stored, and that `summary.messages.jsonl` is generated automatically.
 
 ### Phase 5 — TUI Integration
-- [ ] Update the session list to include a header row, drop inline `B`/`cwd:` labels, and insert a `Summaries` column that reflects cached variant counts via `SummaryPathResolver`.
-- [ ] Populate the detail pane with summary metadata (expected paths, cache timestamp, last run cost) while falling back to hints when no summary exists yet.
-- [ ] Wire keybindings (`s`, `g`, `G`) that lazily initialize `SummaryService`/`OpenRouterClient`, invoke generation, and refresh table/detail state after cache mutations.
-- [ ] Execute long-running summary generation in background tasks with progress/status messaging so the UI remains responsive and emits success/failure outcomes instead of the misleading "cancelled" message seen in the reverted attempt.
-- [ ] Display cached summaries through `pydoc.pager` (or equivalent) to avoid nested event loops while still presenting Markdown cleanly.
-- [ ] Surface clear, inline errors for missing API keys, network failures, or OpenRouter issues without crashing the TUI.
+- [x] Update the session list to include a header row, drop inline `B`/`cwd:` labels, and insert a `Summaries` column that reflects cached variant counts via `SummaryPathResolver`.
+- [x] Populate the detail pane with summary metadata (expected paths, cache timestamp, last run cost) while falling back to hints when no summary exists yet.
+- [x] Wire keybindings (`s`, `g`, `G`) that lazily initialize `SummaryService`/`OpenRouterClient`, invoke generation, and refresh table/detail state after cache mutations.
+- [x] Execute long-running summary generation in background tasks with progress/status messaging so the UI remains responsive and emits success/failure outcomes instead of the misleading "cancelled" message seen in the reverted attempt.
+- [x] Display cached summaries through `pydoc.pager` (or equivalent) to avoid nested event loops while still presenting Markdown cleanly.
+- [x] Surface clear, inline errors for missing API keys, network failures, or OpenRouter issues without crashing the TUI.
 
 ### Phase 6 — Indexing & Metadata Surfacing
 - [ ] Generate/update per-session index JSONL files after each summary write; expose small helper to list available variants for CLI listing and TUI badges.
