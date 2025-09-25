@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codex-summarize-session"
-version = "0.2.0"
+version = "0.4.0"
 description = "CLI to list Codex CLI sessions and extract message lines from JSONL logs"
 readme = "README.md"
 requires-python = ">=3.8"
