@@ -11,6 +11,21 @@
 - Extend the TUI browser to invoke the shared summary command for a highlighted session.
 - Store generated summaries to avoid repeat API costs and enable quick retrieval on subsequent runs.
 
+## TUI Integration Requirements
+- Display a header row in the browse table so the meaning of each column (age, duration, byte size, cwd, summaries) stays obvious even after we streamline labels within rows.
+- Remove inline `B` and `cwd:` prefixes inside data rows and rely on the header for clarity, improving horizontal space for the session title.
+- Surface a new `Summaries` column that reflects how many cached variants exist for each session, using the shared storage resolver to guarantee counts stay accurate after generation.
+- Expand the detail pane to include expected summary paths, cache freshness, and the most recent cost estimate so users understand why a cache hit or miss happened.
+- Provide summary actions directly in the TUI via keybindings: `s` to view a cached summary, `g` to generate or view if one already exists, and `G` to force a regeneration.
+- Initialize `SummaryService` and the `OpenRouterClient` lazily inside the TUI so missing API keys raise a friendly message instead of aborting startup.
+- Render summaries with `pydoc.pager` (or equivalent non-nested terminal pager) to avoid re-entering the running asyncio event loop while still presenting Markdown cleanly.
+- Guard all summary commands with clear error states for missing keys, network failures, or background exceptions, leaving the application responsive.
+
+## Configuration & Flags
+- Extend `python -m codex_summarize_session.cli browse` with summary-centric flags (`--summaries-dir`, `--summary-prompt`, `--summary-model`, `--summary-max-tokens`, `--summary-temperature`, `--summary-reasoning-effort`) mirroring the CLI `summaries generate` options.
+- Ensure defaults align with the CLI command so users can switch between modes without re-specifying configuration.
+- Validate flag combinations on demand when the summary workflow is first invoked, keeping startup fast and avoiding errors before a user requests a summary.
+
 ## Artifact Locations
 - Original session JSONL logs remain under `~/.codex/sessions` (current default exposed by `--sessions-dir`).
 - Extracted message JSONL files default to the same `~/.codex/summaries/<relative-source>` directory as summaries (with filenames ending in `.messages.jsonl`) unless `--output-dir` is supplied; the CLI still honors explicit paths for users who prefer staging them elsewhere.
@@ -52,11 +67,10 @@
 - When caching summaries, include the cost information so users can gauge savings from cache hits.
 
 ## Next Steps
-1. Keep the OpenRouter analysis doc in sync as we discover retry recommendations or provider quirks.
-2. Implement helpers that mirror session paths into the summary directory, hashing external sources gracefully, and surface the active summary root in CLI/TUI status outputs.
-3. Design CLI flags/subcommands and TUI interactions (naming, confirmation flows).
-4. Implement shared summary service module consumed by both CLI and browser entry points.
-5. Prototype cached-summary awareness in the shared listing view (e.g., additional column or badge).
+1. Revisit Phase 5 with the refined TUI requirements above, ensuring we validate UI refresh behavior after summary generation before moving on.
+2. Capture usability notes during implementation (status messaging, pager ergonomics) and roll them into README/help text updates once the feature stabilizes.
+3. Once Phase 5 lands, resume Phase 6 indexing work to expose variant listings in both CLI and TUI.
+4. Keep the OpenRouter analysis doc updated with any retry/backoff adjustments discovered while wiring the TUI workflows.
 
 ## Implementation Plan
 
@@ -83,16 +97,19 @@
 - [x] Include opt-in `--refresh` logic to bypass cache while still recording previous cost information for transparency.
 - [x] Emit structured logs (or debug prints gated by `--verbose`) describing whether a cache hit occurred, which model was used, and total estimated cost.
 
+### Phase 4 - CLI Integration
 - [x] Extend `cli.py` with a `summaries` command group that initially ships a `generate` subcommand accepting session paths, prompt variant, model, `--refresh`, `--stdout`, and `--strip-metadata` flags.
 - [x] Reuse existing session discovery helpers so `generate` can accept glob patterns and `--sessions-dir` overrides.
 - [x] Ensure CLI exit codes distinguish between user errors (invalid prompt path) and provider failures (non-zero to inform shell scripts).
 - [x] Update `--help` text and README usage examples, highlighting how cache hits reduce cost, where summaries are stored, and that `summary.messages.jsonl` is generated automatically.
 
 ### Phase 5 — TUI Integration
-- [ ] Add summary awareness to the `browse` mode: detect cached summaries in the session detail pane and offer shortcuts to view or refresh them.
-- [ ] Introduce a modal/dialog flow that invokes the shared service, streams progress (e.g., "contacting OpenRouter…"), and displays the resulting Markdown.
-- [ ] Handle keyboard shortcuts and ensure non-blocking UI updates so long-running API calls do not freeze navigation.
-- [ ] Gate the feature with a graceful message when no API key is configured, mirroring CLI behavior.
+- [ ] Update the session list to include a header row, drop inline `B`/`cwd:` labels, and insert a `Summaries` column that reflects cached variant counts via `SummaryPathResolver`.
+- [ ] Populate the detail pane with summary metadata (expected paths, cache timestamp, last run cost) while falling back to hints when no summary exists yet.
+- [ ] Wire keybindings (`s`, `g`, `G`) that lazily initialize `SummaryService`/`OpenRouterClient`, invoke generation, and refresh table/detail state after cache mutations.
+- [ ] Execute long-running summary generation in background tasks with progress/status messaging so the UI remains responsive and emits success/failure outcomes instead of the misleading "cancelled" message seen in the reverted attempt.
+- [ ] Display cached summaries through `pydoc.pager` (or equivalent) to avoid nested event loops while still presenting Markdown cleanly.
+- [ ] Surface clear, inline errors for missing API keys, network failures, or OpenRouter issues without crashing the TUI.
 
 ### Phase 6 — Indexing & Metadata Surfacing
 - [ ] Generate/update per-session index JSONL files after each summary write; expose small helper to list available variants for CLI listing and TUI badges.
