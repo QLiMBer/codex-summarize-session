@@ -123,23 +123,21 @@ class SummaryService:
         messages_path: Path,
         request: SummaryRequest,
     ) -> List[Mapping[str, str]]:
-        try:
-            system_prompt = prompt_content.format(
-                session_path=str(Path(request.session_path).expanduser()),
-                summary_path=str(cache_path),
-                prompt_variant=request.prompt_variant,
-                messages_path=str(messages_path),
-            )
-        except KeyError as exc:
-            missing = exc.args[0]
-            raise ValueError(
-                f"Prompt template is missing placeholder '{{{missing}}}' for request {request}"
-            ) from exc
+        system_prompt = prompt_content.strip() or prompt_content
         with messages_path.open("r", encoding="utf-8") as messages_file:
             session_text = messages_file.read()
+        transcript_body = session_text.rstrip("\n")
+        transcript_block = (
+            "<session start>\n"
+            '"""' + "\n"
+            f"{transcript_body}\n"
+            '"""' + "\n"
+            "</session end>"
+        )
+        user_message = transcript_block
         return [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": session_text},
+            {"role": "user", "content": user_message},
         ]
 
     def _build_metadata(

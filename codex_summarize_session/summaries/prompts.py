@@ -70,7 +70,3 @@ class PromptLoader:
             raise PromptValidationError(
                 f"Prompt '{path}' has mismatched template braces: {open_tokens} '{{{{' vs {close_tokens} '}}}}'."
             )
-        if "{{" not in content:
-            raise PromptValidationError(
-                f"Prompt '{path}' does not include any template placeholders; expected at least one '{{{{...}}}}'."
-            )

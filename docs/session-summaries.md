@@ -41,15 +41,13 @@
 - Maintain an optional lightweight index (JSONL) in each directory listing available variants for quick lookup; avoid a global database until we need cross-session queries.
 - External session sources (outside the configured sessions root) are stored under `external/<hash>-<slug>` so we avoid leaking full filesystem paths while keeping the cache human-readable.
 - Model metadata fetched from OpenRouter is cached in-memory with an optional JSON file on disk so repeated runs estimate cost without re-hitting the API.
-- Default prompts can reference placeholders like `{{session_path}}`, `{{summary_path}}`, `{{messages_path}}`, and `{{prompt_variant}}`; the service raises a clear error when templates omit required placeholders.
-
 - CLI/TUI export command will support `--strip-metadata` to output only the Markdown body when users need the raw summary without YAML front matter.
 
 ## Prompt Strategy
 - Maintain prompt templates as standalone files; the CLI accepts an explicit `--prompt-path` so naming the file doubles as a preset (e.g., `prompts/concise.md`).
 - Support multiple prompt variants by name, selectable via CLI/TUI options; default to the standard summary prompt used in prior manual workflows.
 - Capture any future prompt experiments or adjustments in this doc for version tracking.
-- Ship a `prompts/default.md` template that references `{{session_path}}`, `{{summary_path}}`, and `{{prompt_variant}}` so placeholder validation succeeds out of the box.
+- Ship a `prompts/default.md` template that explains the transcript markers and can be copied to create new variants.
 
 ## OpenRouter Integration (Analysis Pending)
 - Before implementation, perform a focused review of OpenRouter API capabilities, authentication flow, rate limits, and error handling requirements.
