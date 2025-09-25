@@ -3,18 +3,19 @@ codex-summarize-session
 
 Small CLI to help browse Codex CLI session logs and extract user/assistant messages from JSONL files for later summarization.
 
-Current version: `0.2.0` (see `CHANGELOG.md` for details).
+Current version: `0.4.0` (see `CHANGELOG.md` for details).
 
 Features
 --------
-- List recent sessions under `~/.codex/sessions` (or a custom dir).
+- List recent sessions under `~/.codex/sessions` (or a custom dir) with a fixed header that labels age, size, cwd, and cached summary counts.
 - Show each session's working directory (parsed from the log) directly in the list output.
+- Track how many cached summaries exist per session and reuse that information in both the `list` output and the interactive browser.
 - Extract only lines where `"type":"message"` into a new JSONL.
 - Stream to stdout or write to a file.
 - Default output path is the current working directory (not the script location).
 - Accept either a full path or just the filename present under the sessions dir.
 - Jump straight from `list` to `extract` by passing the numeric row shown in the listing.
-- Optional interactive browser (`browse` subcommand) with arrow-key navigation.
+- Optional interactive browser (`browse` subcommand) that now supports summary viewing/regeneration alongside message extraction.
 
 Install
 -------
@@ -34,6 +35,13 @@ There is no PyPI package yet—install directly from this repository.
      - Editable: `pipx install --editable .[browser]` (use `--force` when refreshing an existing install)
 
 Either approach drops the `codex-summarize-session` entrypoint on your PATH (often `~/.local/bin` or the active virtualenv).
+
+### Configure OpenRouter access (summaries preview)
+- Export an API key via `OPENROUTER_API_KEY=<token>` before running summary commands; we read it on every invocation so you can scope it per shell.
+- Optionally store the key at `~/.config/openrouter/key` (one line, no quotes). The CLI checks `OPENROUTER_API_KEY` first, then this file, so you can keep the variable unset in scripts.
+- Set `OPENROUTER_API_BASE` if you need to target a self-hosted proxy; otherwise the default public endpoint is used.
+- Keep tokens out of version control—`codex-summarize-session` only reads the key and never writes back to that file.
+- When the key is missing we will gate the upcoming `summaries` commands/browse shortcuts with a clear error so it’s safe to install ahead of configuration.
 
 Uninstall
 ---------
@@ -63,6 +71,35 @@ Usage
 
   - `codex-summarize-session browse`
   - `codex-summarize-session browse --limit 50`
+  - `codex-summarize-session browse --summary-model mistral/mistral-large --summary-temperature 0.5`
+
+  Key bindings:
+
+  - Arrow keys/PageUp/PageDown/Home/End: navigate the session table.
+  - `Enter`: prompt for message extraction path (same as before).
+  - `s`: view the cached summary for the highlighted session using `pydoc.pager` (if present).
+  - `g`: generate a summary when none exists, or view the cached copy when one is already available.
+  - `G`: regenerate the summary, bypassing cache.
+  - `q` or `Esc`: quit the browser.
+
+  Summary configuration flags:
+
+  - `--summaries-dir`: override the cache root (defaults to `~/.codex/summaries`).
+  - `--prompt`: select the prompt variant or point to an absolute file path.
+  - `--summary-model`, `--summary-temperature`, `--summary-max-tokens`, `--summary-reasoning-effort`: mirror the `summaries generate` CLI options for fast iteration inside the browser.
+
+- Customize summary prompts:
+
+  - `codex-summarize-session summaries generate 1 --prompt concise`
+  - `codex-summarize-session summaries generate 1 --prompt /tmp/my-prompt.md`
+  - `codex-summarize-session browse --prompt concise`
+  - `codex-summarize-session browse --prompt ~/prompts/session-review.md`
+
+- Generate AI summaries (requires OpenRouter API access):
+
+  - `codex-summarize-session summaries generate 1`
+  - `codex-summarize-session summaries generate ~/.codex/sessions/example.jsonl --model x-ai/grok-4-fast:free`
+  - `codex-summarize-session summaries generate 1 --stdout --strip-metadata`
 
 - Extract by filepath:
 
@@ -99,10 +136,30 @@ Notes
 - If you pass `--output`, that exact file path is used.
 - Use `--force` to overwrite an existing output file.
 - Malformed JSON lines are skipped instead of aborting the extraction.
-- A future `summarize` command can be added to call an LLM API or a local model.
+- The `summaries generate` command caches Markdown output under `~/.codex/summaries/<session>/<variant>/summary.md` and the cleaned transcript alongside it as `summary.messages.jsonl`, so repeat runs avoid additional API spend.
+- The `list` output and TUI browser share the same cache scanner, so the "Summaries" column reflects the number of cached variants on disk in both modes.
+- Prompt variants live under `codex_summarize_session/summaries/prompts/`. Reference a file by stem name—or pass an absolute path—with the shared `--prompt` flag used by both CLI and TUI. Cache folders are keyed by that variant name, so different prompts keep independent summaries.
 - Extraction normalizes entries where messages are wrapped in `response_item` payloads and preserves timestamps when present.
 - The `browse` command will prompt for a destination path (pre-filled with a sensible default). Press `Ctrl+C` to cancel.
+- When summary key bindings are used without an API key configured, the browser reports the issue inline and stays responsive.
 - When `prompt_toolkit` is missing, the CLI suggests installing the optional `[browser]` extra before launching the interactive mode.
+
+Prompt Templates
+----------------
+- Prompt files are plain text/Markdown—no templating required. Whatever you write becomes the system prompt.
+- When we call OpenRouter the conversation looks like this:
+
+  ```text
+  System: <your prompt>
+  User:
+    <session start>
+    """
+    <messages-only transcript>
+    """
+    </session end>
+  ```
+
+- The default template (`summaries/prompts/default.md`) already explains that the transcript is wrapped between `<session start>` / `<session end>` markers. Feel free to create additional prompts in that directory or point to any file with `--prompt`.
 
 Development Notes
 -----------------

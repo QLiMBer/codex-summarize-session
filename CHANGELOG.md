@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 while it remains under the `0.x` line (breaking changes may still occur).
 
+## [0.4.0] - 2025-09-25
+### Added
+- `codex-summarize-session summaries generate` CLI command that orchestrates OpenRouter calls, caches Markdown summaries, and emits cost metadata.
+- Shared summary service and storage layer that mirror session paths, manage Markdown/YAML front matter, and reuse cleaned transcripts.
+- TUI browse shortcuts (`s`, `g`, `G`) to view, generate, and refresh summaries without leaving the session list, including a detail pane with cache/cost status.
+
+### Changed
+- Simplified prompt handling: prompts are plain Markdown, passed as the system message, while transcripts are wrapped between `<session start>` markers for the user message.
+- Unified prompt selection behind a single `--prompt` flag for both CLI and TUI and removed Python-format placeholders from templates.
+
+### Documentation
+- Captured the session-summary plan, OpenRouter analysis notes, and prompt workflow updates in `docs/session-summaries.md` and `README.md`.
+- Recorded lessons learned from the initial session-summary experiments for future iterations.
+
 ## [0.3.0] - 2024-09-22
 ### Added
 - Optional `[browser]` extra that provides `prompt_toolkit` support for the new interactive session browser.

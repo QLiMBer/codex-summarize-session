@@ -3,14 +3,18 @@
 ## Quick TODO
 - [] Update `pyproject.toml` version when ready.
 - [] Commit and update `CHANGELOG.md`/`README.md` with latest changes.
+- [] Confirm OpenRouter configuration docs are current (`README.md`, `docs/session-summaries.md`).
 - [] Build fresh artifacts with `python -m build` and run `twine check dist/*`.
 - [] Smoke-test install from the built wheel in a clean environment.
+- [] Run summary feature smoke tests (CLI `summaries generate`, TUI browse shortcut, cache hit).
 - [] Tag the release and push (`git tag vX.Y.Z && git push origin vX.Y.Z`).
 - [] Draft GitHub release notes (copy from `CHANGELOG.md`) and attach/mention artifacts.
 
 ## Step Details
 - **Version bump**: edit `pyproject.toml` (and optionally expose `__version__`), then commit before building.
 - **Docs/changelog**: ensure `README.md` usage examples reflect new behaviour; log the change in `CHANGELOG.md`.
+  - ensure they also reflect the current version number
+- **Summaries feature**: verify OpenRouter keys are read from both env vars and config file, regenerate any sample prompts/caching docs, and capture CLI/TUI screenshots or transcripts for release notes.
 - **Build artifacts**: run `rm -rf dist/ && python -m build`; verify `.tar.gz` and `.whl` files exist, then `twine check dist/*`.
 - **Smoke-test**: create a fresh venv (`python3 -m venv /tmp/codex-release-test && source /tmp/codex-release-test/bin/activate`), install from the built wheel (`pip install --no-index --find-links dist codex-summarize-session==X.Y.Z`), then run `codex-summarize-session list` and `extract`; tear down the venv afterwards.
 - **Tag & release**: `git tag vX.Y.Z`, `git push origin main`, `git push origin vX.Y.Z`; draft release notes via GitHub UI or `gh release create` referencing the changelog.

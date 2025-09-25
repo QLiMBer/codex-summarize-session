@@ -1,34 +1,19 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `codex_summarize_session/` holds the CLI implementation; `cli.py` defines the argument parsing, session listing, and extraction helpers.
-- `pyproject.toml` configures packaging via `setuptools`; `README.md` documents user-facing usage.
-- Session JSONL fixtures live outside the repo; the tool reads from `~/.codex/sessions` or a user-supplied directory at runtime.
+The CLI lives under `codex_summarize_session/`; `cli.py` contains entrypoints and helpers for listing, extracting, and browsing session logs. Packaging metadata sits in `pyproject.toml`, while `README.md`, `ROADMAP.md`, and `RELEASE_PLAN.md` track user docs and future work. Build artifacts land in `build/` and `dist/` during packaging runs—treat them as disposable. Session JSONL fixtures are not committed; the tool reads from `~/.codex/sessions` or a user-supplied directory at runtime.
 
 ## Build, Test, and Development Commands
-- Install locally from the repo (no PyPI package yet):
-  - Users: `python -m pip install .` or include the interactive extra with `python -m pip install .[browser]`.
-  - Developers: `python -m pip install -e .[browser]` for editable work, or `pipx install --editable .` followed by `pipx inject codex-summarize-session prompt_toolkit`.
-- Run the CLI without installing: `python -m codex_summarize_session.cli list` or add extra args (`extract`, `--sessions-dir`, etc.).
-- No dedicated test suite yet; prefer manual smoke runs of `list`, `extract`, and `browse` after changes.
-- After switching between pip/pipx installs, run `hash -r` so Bash refreshes cached command paths before re-testing.
+Install for development with `python -m pip install -e .[browser]` or `pipx install --editable .` followed by `pipx inject codex-summarize-session prompt_toolkit`. Run the CLI directly via `python -m codex_summarize_session.cli list --limit 5` or the installed `codex-summarize-session` script. After switching between pip and pipx, run `hash -r` so Bash refreshes command paths.
 
 ## Coding Style & Naming Conventions
-- Python 3.8+ code; follow PEP 8 with 4-space indentation and descriptive, lowercase variable names.
-- Keep helper functions in `cli.py` focused and pure when possible; add docstrings or short comments only when logic is non-obvious.
-- Avoid adding non-ASCII characters unless already required by existing files.
+Target Python 3.8+ with PEP 8 formatting: four-space indents, descriptive lowercase names, and snake_case functions. Keep helpers focused and prefer pure functions where practical. Add docstrings or concise comments only when behavior is non-obvious. Avoid introducing non-ASCII characters unless already present.
 
 ## Testing Guidelines
-- Until automated tests are introduced, validate changes by running representative commands such as:
-  - `codex-summarize-session list --limit 5`
-  - `codex-summarize-session extract <session.jsonl> --stdout`
-- When adding new parsing logic, create ad-hoc sample JSONL snippets to verify edge cases (e.g., nested `response_item` payloads).
+There is no automated suite yet; perform manual smoke checks of `list`, `extract`, and `browse` commands against sample JSONL files. When updating parsing logic, craft temporary JSONL snippets to exercise edge cases such as nested `response_item` payloads. Remove ad-hoc fixtures before committing.
 
 ## Commit & Pull Request Guidelines
-- Use Conventional Commit prefixes (e.g., `feat:`, `fix:`, `docs:`) to summarize intent, as seen in the existing history.
-- Keep commits focused; include context in the body if behavior changes or new flags are introduced.
-- For PRs, describe the motivation, show sample CLI output for UX tweaks, and reference related issues when applicable. Ensure README or help text stays in sync with new functionality.
+Use Conventional Commit prefixes (`feat:`, `fix:`, `docs:`, etc.) and keep commits focused. Include motivation and sample CLI output in commit bodies or PR descriptions when behavior changes. PRs should describe the change, note any follow-up work, reference relevant issues, and confirm manual test coverage. Squash merge once CI-equivalent checks pass and reviewers approve.
 
 ## Security & Configuration Tips
-- The CLI should never modify files under `~/.codex/sessions`; treat session logs as read-only.
-- Avoid bundling real session data in the repository. If examples are needed, redact sensitive fields and store them under clearly marked fixture directories.
+Treat `~/.codex/sessions` as read-only user data—never modify or bundle real sessions in the repo. If you introduce example logs, redact sensitive content and store them in clearly labelled fixture directories. Confirm that generated artifacts, caches, or virtual environments stay out of source control.
