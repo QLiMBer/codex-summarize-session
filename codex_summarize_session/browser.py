@@ -319,7 +319,6 @@ class SessionBrowser:
             session_path=entry.path,
             prompt_variant=self.summary_options.prompt_variant,
             model=self.summary_options.model,
-            prompt_path=self.summary_options.prompt_path,
             reasoning_effort=self.summary_options.reasoning_effort,
             refresh=refresh,
         )

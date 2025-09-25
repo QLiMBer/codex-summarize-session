@@ -124,14 +124,11 @@ def handle_summaries_generate(args: argparse.Namespace, parser: argparse.Argumen
     exit_code = 0
     try:
         for session_path in resolved_sessions:
-            prompt_variant = args.prompt or (
-                args.prompt_path.stem if args.prompt_path else "default"
-            )
+            prompt_variant = args.prompt or "default"
             request = SummaryRequest(
                 session_path=session_path,
                 prompt_variant=prompt_variant,
                 model=args.model,
-                prompt_path=args.prompt_path,
                 reasoning_effort=normalize_reasoning_effort(args.reasoning_effort),
                 refresh=args.refresh,
                 strip_metadata=args.strip_metadata,
@@ -253,7 +250,6 @@ class SessionEntry:
 class BrowseSummaryOptions:
     summaries_dir: Path
     prompt_variant: str
-    prompt_path: Optional[Path]
     model: str
     temperature: float
     max_tokens: Optional[int]
@@ -423,14 +419,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Directory to store cached summaries used by browse mode (default: ~/.codex/summaries)",
     )
     p_browse.add_argument(
-        "--summary-prompt",
+        "--prompt",
         default="default",
         help="Prompt preset to load when generating summaries interactively (default: default)",
-    )
-    p_browse.add_argument(
-        "--summary-prompt-path",
-        type=Path,
-        help="Explicit path to a prompt template file used instead of --summary-prompt",
     )
     p_browse.add_argument(
         "--summary-model",
@@ -476,16 +467,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_generate = summaries_sub.add_parser("generate", help="Generate Markdown summaries for session logs")
     p_generate.add_argument("sessions", nargs="+", help="Session indices, filenames, or paths to summarise")
-    prompt_group = p_generate.add_mutually_exclusive_group()
-    prompt_group.add_argument(
+    p_generate.add_argument(
         "--prompt",
         default="default",
         help="Prompt preset name to load from the prompts directory (default: default)",
-    )
-    prompt_group.add_argument(
-        "--prompt-path",
-        type=Path,
-        help="Explicit path to a prompt template file",
     )
     p_generate.add_argument(
         "--model",
@@ -577,10 +562,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         entries = build_session_entries(paths, sessions_dir)
         summary_options = BrowseSummaryOptions(
             summaries_dir=(args.summaries_dir or get_default_summaries_dir()).expanduser(),
-            prompt_variant=args.summary_prompt,
-            prompt_path=args.summary_prompt_path.expanduser()
-            if args.summary_prompt_path
-            else None,
+            prompt_variant=args.prompt,
             model=args.summary_model,
             temperature=args.summary_temperature,
             max_tokens=args.summary_max_tokens,

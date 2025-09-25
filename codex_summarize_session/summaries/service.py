@@ -112,8 +112,6 @@ class SummaryService:
         return self._client
 
     def _load_prompt(self, request: SummaryRequest):
-        if request.prompt_path:
-            return self._prompt_loader.load(str(request.prompt_path))
         return self._prompt_loader.load(request.prompt_variant)
 
     def _default_messages(

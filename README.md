@@ -3,7 +3,7 @@ codex-summarize-session
 
 Small CLI to help browse Codex CLI session logs and extract user/assistant messages from JSONL files for later summarization.
 
-Current version: `0.2.0` (see `CHANGELOG.md` for details).
+Current version: `0.4.0` (see `CHANGELOG.md` for details).
 
 Features
 --------
@@ -85,15 +85,15 @@ Usage
   Summary configuration flags:
 
   - `--summaries-dir`: override the cache root (defaults to `~/.codex/summaries`).
-  - `--summary-prompt` / `--summary-prompt-path`: select the prompt variant or file.
+  - `--prompt`: select the prompt variant or point to an absolute file path.
   - `--summary-model`, `--summary-temperature`, `--summary-max-tokens`, `--summary-reasoning-effort`: mirror the `summaries generate` CLI options for fast iteration inside the browser.
 
 - Customize summary prompts:
 
   - `codex-summarize-session summaries generate 1 --prompt concise`
-  - `codex-summarize-session summaries generate 1 --prompt-path /tmp/my-prompt.md`
-  - `codex-summarize-session browse --summary-prompt concise`
-  - `codex-summarize-session browse --summary-prompt-path ~/prompts/session-review.md`
+  - `codex-summarize-session summaries generate 1 --prompt /tmp/my-prompt.md`
+  - `codex-summarize-session browse --prompt concise`
+  - `codex-summarize-session browse --prompt ~/prompts/session-review.md`
 
 - Generate AI summaries (requires OpenRouter API access):
 
@@ -138,7 +138,7 @@ Notes
 - Malformed JSON lines are skipped instead of aborting the extraction.
 - The `summaries generate` command caches Markdown output under `~/.codex/summaries/<session>/<variant>/summary.md` and the cleaned transcript alongside it as `summary.messages.jsonl`, so repeat runs avoid additional API spend.
 - The `list` output and TUI browser share the same cache scanner, so the "Summaries" column reflects the number of cached variants on disk in both modes.
-- Prompt variants live under `codex_summarize_session/summaries/prompts/`. Reference a file by stem name with `--prompt` (CLI) or `--summary-prompt` (TUI), or point to any filesystem path with the matching `--*-prompt-path` flag. Cache folders are keyed by that variant name, so different prompts keep independent summaries.
+- Prompt variants live under `codex_summarize_session/summaries/prompts/`. Reference a file by stem name—or pass an absolute path—with the shared `--prompt` flag used by both CLI and TUI. Cache folders are keyed by that variant name, so different prompts keep independent summaries.
 - Extraction normalizes entries where messages are wrapped in `response_item` payloads and preserves timestamps when present.
 - The `browse` command will prompt for a destination path (pre-filled with a sensible default). Press `Ctrl+C` to cancel.
 - When summary key bindings are used without an API key configured, the browser reports the issue inline and stays responsive.
@@ -159,7 +159,7 @@ Prompt Templates
     </session end>
   ```
 
-- The default template (`summaries/prompts/default.md`) already explains that the transcript is wrapped between `<session start>` / `<session end>` markers. Feel free to create additional prompts in that directory or point to any file with `--prompt-path` / `--summary-prompt-path`.
+- The default template (`summaries/prompts/default.md`) already explains that the transcript is wrapped between `<session start>` / `<session end>` markers. Feel free to create additional prompts in that directory or point to any file with `--prompt`.
 
 Development Notes
 -----------------

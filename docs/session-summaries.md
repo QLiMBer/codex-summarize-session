@@ -22,7 +22,7 @@
 - Guard all summary commands with clear error states for missing keys, network failures, or background exceptions, leaving the application responsive.
 
 ## Configuration & Flags
-- Extend `python -m codex_summarize_session.cli browse` with summary-centric flags (`--summaries-dir`, `--summary-prompt`, `--summary-model`, `--summary-max-tokens`, `--summary-temperature`, `--summary-reasoning-effort`) mirroring the CLI `summaries generate` options.
+- Extend `python -m codex_summarize_session.cli browse` with summary-centric flags (`--summaries-dir`, `--prompt`, `--summary-model`, `--summary-max-tokens`, `--summary-temperature`, `--summary-reasoning-effort`) mirroring the CLI `summaries generate` options.
 - Ensure defaults align with the CLI command so users can switch between modes without re-specifying configuration.
 - Validate flag combinations on demand when the summary workflow is first invoked, keeping startup fast and avoiding errors before a user requests a summary.
 
@@ -44,7 +44,7 @@
 - CLI/TUI export command will support `--strip-metadata` to output only the Markdown body when users need the raw summary without YAML front matter.
 
 ## Prompt Strategy
-- Maintain prompt templates as standalone files; the CLI accepts an explicit `--prompt-path` so naming the file doubles as a preset (e.g., `prompts/concise.md`).
+- Maintain prompt templates as standalone files; point the shared `--prompt` flag at either a preset name (e.g., `prompts/concise.md` ⇒ `concise`) or an absolute file path.
 - Support multiple prompt variants by name, selectable via CLI/TUI options; default to the standard summary prompt used in prior manual workflows.
 - Capture any future prompt experiments or adjustments in this doc for version tracking.
 - Ship a `prompts/default.md` template that explains the transcript markers and can be copied to create new variants.

@@ -13,7 +13,6 @@ class SummaryRequest:
     session_path: Path
     prompt_variant: str
     model: str
-    prompt_path: Optional[Path] = None
     reasoning_effort: Optional[str] = "medium"
     refresh: bool = False
     strip_metadata: bool = False
