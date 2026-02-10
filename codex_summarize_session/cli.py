@@ -425,8 +425,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_browse.add_argument(
         "--summary-model",
-        default="x-ai/grok-4-fast:free",
-        help="OpenRouter model identifier to use for interactive summaries (default: x-ai/grok-4-fast:free)",
+        default="qwen/qwen3-coder:free",
+        help="OpenRouter model identifier to use for interactive summaries (default: qwen/qwen3-coder:free)",
     )
     p_browse.add_argument(
         "--summary-temperature",
@@ -474,8 +474,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_generate.add_argument(
         "--model",
-        default="x-ai/grok-4-fast:free",
-        help="OpenRouter model identifier to use (default: x-ai/grok-4-fast:free)",
+        default="qwen/qwen3-coder:free",
+        help="OpenRouter model identifier to use (default: qwen/qwen3-coder:free)",
     )
     p_generate.add_argument(
         "--summaries-dir",
