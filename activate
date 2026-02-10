@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Helper to activate the project's virtualenv.
+#
+# Usage:
+#   ./activate        # starts a new interactive shell with .venv activated
+#   source ./activate # activate .venv in the current shell
+
+VENV_DIR=".venv"
+ACTIVATE_SCRIPT="$VENV_DIR/bin/activate"
+
+if [ ! -f "$ACTIVATE_SCRIPT" ]; then
+  echo "Virtual environment not found at $VENV_DIR." >&2
+  echo "Create it with: python -m venv .venv" >&2
+  exit 1
+fi
+
+# If the file is sourced (Bash/Zsh), just source the venv activate script.
+if [ "${BASH_SOURCE[0]:-}" != "${0:-}" ]; then
+  # shellcheck disable=SC1090
+  . "$ACTIVATE_SCRIPT"
+  return 0 2>/dev/null || true
+fi
+
+# Not sourced: source the activate script and replace the current process
+# with a new interactive shell that inherits the activated env.
+. "$ACTIVATE_SCRIPT"
+SHELL_CMD="${SHELL:-/bin/bash}"
+exec "$SHELL_CMD" -i
