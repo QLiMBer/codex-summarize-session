@@ -37,7 +37,8 @@ def main() -> int:
         return 2
 
     try:
-        client = build_openrouter_client(summary_root=Path(args.summaries_dir))
+        summaries_root = Path(args.summaries_dir).expanduser()
+        client = build_openrouter_client(summary_root=summaries_root)
     except Exception as exc:
         print("ERROR: failed to construct OpenRouter client:")
         traceback.print_exc()

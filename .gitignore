@@ -45,3 +45,7 @@ coverage.xml
 .DS_Store
 Thumbs.db
 
+# --- Local caches (repo-local) ---
+.cache/
+
+

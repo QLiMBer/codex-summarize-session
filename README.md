@@ -86,6 +86,14 @@ python scripts/diagnose_summary.py /path/to/session.jsonl --model meta-llama/lla
 Notes on `--max-tokens`:
 - Caps the number of completion tokens requested from the provider. This directly affects quota, cost, and output length. Lower values reduce chance of quota errors and generally return faster.
 - The diagnostic script uses the same OpenRouter key lookup as the CLI (`OPENROUTER_API_KEY` or `~/.config/openrouter/key`).
+
+Model cache file
+----------------
+- **Model cache location:** `.cache/openrouter/_model_catalog.json` — always cached locally in the repo to avoid frequent network calls and for predictable artifact management.
+- **Why it exists:** the client caches the OpenRouter `/models` endpoint response to avoid repeated network calls and to expose model metadata (pricing, context length) to diagnostic tools.
+- **When it's created:** automatically written on the first successful `GET /models` API call. The cache is refreshed periodically (TTL ~1 hour). Delete to force a fresh fetch.
+- **Safe to remove:** it's a cache-only artifact with no secrets; removing it just triggers a new network fetch on the next run.
+
 Uninstall
 ---------
 - pipx: `pipx uninstall codex-summarize-session`

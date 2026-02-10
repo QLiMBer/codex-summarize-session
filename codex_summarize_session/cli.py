@@ -48,7 +48,7 @@ def load_openrouter_api_key() -> Optional[str]:
     return contents or None
 
 
-def build_openrouter_client(summary_root: Path) -> OpenRouterClient:
+def build_openrouter_client() -> OpenRouterClient:
     api_key = load_openrouter_api_key()
     if not api_key:
         raise AuthenticationError(
@@ -58,7 +58,9 @@ def build_openrouter_client(summary_root: Path) -> OpenRouterClient:
     base_url = os.getenv("OPENROUTER_API_BASE", "https://openrouter.ai/api/v1")
     referer = os.getenv("OPENROUTER_REFERER", "https://github.com/QLiMBer/codex-summarize-session") or None
     title = os.getenv("OPENROUTER_TITLE", "codex-summarize-session") or None
-    cache_path = (summary_root / "_model_catalog.json")
+    cache_dir = Path(".cache/openrouter")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_path = cache_dir / "_model_catalog.json"
     return OpenRouterClient(
         api_key=api_key,
         base_url=base_url,
@@ -79,7 +81,7 @@ def normalize_reasoning_effort(value: Optional[str]) -> Optional[str]:
 def create_summary_service(sessions_dir: Path, summaries_dir: Path) -> tuple[SummaryService, OpenRouterClient]:
     summaries_dir = summaries_dir.expanduser()
     sessions_dir = sessions_dir.expanduser()
-    client = build_openrouter_client(summaries_dir)
+    client = build_openrouter_client()
     service = SummaryService(
         summary_root=summaries_dir,
         sessions_root=sessions_dir,
