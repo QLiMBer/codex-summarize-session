@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Helper to activate the project's virtualenv.
+# Minimal helper intended to be sourced: `source ./activate`
 #
-# Usage:
-#   ./activate        # starts a new interactive shell with .venv activated
-#   source ./activate # activate .venv in the current shell
+# Usage (preferred):
+#   source ./activate
+#
+# If run as an executable, the script will instruct you to source it.
 
 VENV_DIR=".venv"
 ACTIVATE_SCRIPT="$VENV_DIR/bin/activate"
@@ -11,36 +12,31 @@ ACTIVATE_SCRIPT="$VENV_DIR/bin/activate"
 if [ ! -f "$ACTIVATE_SCRIPT" ]; then
   echo "Virtual environment not found at $VENV_DIR." >&2
   echo "Create it with: python -m venv .venv" >&2
-  exit 1
+  # If sourced, return a failure code; otherwise exit.
+  if [ "${BASH_SOURCE[0]}" != "${0}" ]; then
+    return 1 2>/dev/null || true
+  else
+    exit 1
+  fi
 fi
 
-# If the file is sourced (Bash/Zsh), just source the venv activate script.
-if [ "${BASH_SOURCE[0]:-}" != "${0:-}" ]; then
-  # shellcheck disable=SC1090
-  . "$ACTIVATE_SCRIPT"
-  return 0 2>/dev/null || true
+# If the file is executed (not sourced), print guidance and exit.
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+  cat <<'EOF' >&2
+This file is intended to be sourced into your current shell so the venv
+activation persists. Run:
+
+  source ./activate
+
+Or create the venv first with:
+
+  python -m venv .venv
+
+EOF
+  exit 0
 fi
 
-# Not sourced: source the activate script and replace the current process
-# with a new interactive shell that inherits the activated env.
+# Source the venv activation script into the current shell.
+# shellcheck disable=SC1090
 . "$ACTIVATE_SCRIPT"
-# Try to preserve the user's preferred shell but fall back to bash when
-# the preferred shell is unknown or likely incompatible with the bash
-# style activate script (e.g., fish).
-SHELL_CMD="${SHELL:-/bin/bash}"
-case "$(basename "$SHELL_CMD")" in
-  bash|zsh)
-    ;;
-  *)
-    # fallback to bash for best compatibility
-    SHELL_CMD="/bin/bash"
-    ;;
-esac
 
-# Try to make the virtualenv prompt visible in the spawned shell. Many shells
-# honour the PS1 environment variable on startup; set a simple prefix so users
-# see the activation state immediately. This may be overridden by the shell's
-# own rc files but works in the common case.
-export PS1="($(basename "$VENV_DIR")) ${PS1:-}\u@\h:\w$ "
-
-exec "$SHELL_CMD" -i

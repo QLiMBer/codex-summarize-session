@@ -82,6 +82,23 @@ Iterate Without Reinstalling
   - `python -m codex_summarize_session.cli extract <session.jsonl>`
 - Ad-hoc run (no permanent install): `pipx run --spec . codex-summarize-session list`
 
+- Quick venv helper
+  - Create a virtualenv for the project (if you don't have one):
+
+    ```bash
+    python -m venv .venv
+    ```
+
+  - Activate the venv in your current shell (preferred):
+
+    ```bash
+    source ./activate
+    ```
+
+  - The `activate` helper is minimal and intended to be sourced; running
+    `./activate` will only print usage guidance. This keeps activation in the
+    current shell so the environment and prompt persist.
+
 Usage
 -----
 - List latest sessions (most recent first):
