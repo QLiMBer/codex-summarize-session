@@ -6,7 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 while it remains under the `0.x` line (breaking changes may still occur).
 
+
+## [X.X.X] - 2025-XX-XX
+
+- new prompts created
+
 ## [0.4.0] - 2025-09-25
+
 ### Added
 - `codex-summarize-session summaries generate` CLI command that orchestrates OpenRouter calls, caches Markdown summaries, and emits cost metadata.
 - Shared summary service and storage layer that mirror session paths, manage Markdown/YAML front matter, and reuse cleaned transcripts.

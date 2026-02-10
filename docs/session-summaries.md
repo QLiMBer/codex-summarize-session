@@ -65,10 +65,30 @@
 - When caching summaries, include the cost information so users can gauge savings from cache hits.
 
 ## Next Steps
-1. Capture any lingering usability findings from the new browse keybindings (status clarity, pager ergonomics) and track follow-up tweaks here.
-2. Move on to Phase 6 indexing work to surface cached variants via dedicated CLI/TUI commands and reuse the newly added resolver helpers.
-3. Add a new keybinding to `e`, which extracts existing summary to MD file, without metadata. Also add this functionality to CLI.
-4. Keep the OpenRouter analysis doc updated with retry/backoff adjustments observed during manual testing.
+0. Define names for parts of TUI, so it is clear, and unambiguous in documentation.
+- row pane, detail pane, status? 
+1. Capture any lingering usability findings from the new browse keybindings (status clarity, pager ergonomics) and track follow-up tweaks here. (remove only particular points ssdone, keep this bullet)
+- show used prompt in detail pane
+- show active prompt in status
+- let user select prompt in TUI
+3. Do not include raw_response to summaries
+4. Move on to Phase 6 indexing work to surface cached variants via dedicated CLI/TUI commands and reuse the newly added resolver helpers.
+5. Add a new keybinding to `e`, which extracts existing summary without YAML metadata to MD file. Also add this functionality to CLI.
+6. Update README.md for other user
+- Specify usecase and motivation
+- Make it actual, better readable
+- Make it attractive
+
+
+## Future ideas
+- Store raw used prompts
+  - either in summary metadata
+  - or hash based in some folder (so only unique ones are stored)
+- Rotate cached variants in details pane using keybinding. With impact on:
+  - summary metadata in details pan
+  - relevant keybindings
+- Project specific prompts. Or just addons to main prompt for specific projects.
+  - This might be also done on prompt naming level.
 
 ## Implementation Plan
 
