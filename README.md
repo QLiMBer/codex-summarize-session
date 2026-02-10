@@ -65,6 +65,27 @@ Recommended free models for session summarization:
 - `meta-llama/llama-3.3-70b-instruct:free` – High quality, 128K context
 - `mistralai/mistral-small-3.1-24b-instruct:free` – Efficient, 128K context
 - `google/gemma-3-27b-it:free` – Good balance, 131K context
+ 
+### Diagnostics & utilities
+We include two small helper scripts under `scripts/` to inspect OpenRouter and reproduce failures:
+
+- `scripts/list_openrouter_models.py` — Query OpenRouter for available models and pricing. Use `--free`/`--paid` and `--limit` to filter results.
+
+- `scripts/diagnose_summary.py` — Attempt to generate a summary for a single session file and print full tracebacks for any errors. Helpful when a summary fails with provider errors (rate limits, quota, parsing issues).
+
+Usage examples:
+
+```bash
+# List free models (first 10)
+python scripts/list_openrouter_models.py --free --limit 10
+
+# Diagnose a failing summary; optionally cap completion tokens to avoid quota errors
+python scripts/diagnose_summary.py /path/to/session.jsonl --model meta-llama/llama-3.3-70b-instruct:free --max-tokens 1024
+```
+
+Notes on `--max-tokens`:
+- Caps the number of completion tokens requested from the provider. This directly affects quota, cost, and output length. Lower values reduce chance of quota errors and generally return faster.
+- The diagnostic script uses the same OpenRouter key lookup as the CLI (`OPENROUTER_API_KEY` or `~/.config/openrouter/key`).
 Uninstall
 ---------
 - pipx: `pipx uninstall codex-summarize-session`
