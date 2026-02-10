@@ -42,7 +42,29 @@ Either approach drops the `codex-summarize-session` entrypoint on your PATH (oft
 - Set `OPENROUTER_API_BASE` if you need to target a self-hosted proxy; otherwise the default public endpoint is used.
 - Keep tokens out of version control—`codex-summarize-session` only reads the key and never writes back to that file.
 - When the key is missing we will gate the upcoming `summaries` commands/browse shortcuts with a clear error so it’s safe to install ahead of configuration.
+### List available OpenRouter models
+To see which models are available on OpenRouter (especially free/zero-cost ones), use the provided utility script:
 
+```bash
+# Show first 10 free models (zero prompt/completion cost)
+python scripts/list_openrouter_models.py --free --limit 10
+
+# Show all free models
+python scripts/list_openrouter_models.py --free
+
+# Show all models (free and paid)
+python scripts/list_openrouter_models.py
+
+# Show only paid models
+python scripts/list_openrouter_models.py --paid
+```
+
+The script reads your OpenRouter API key from `OPENROUTER_API_KEY` environment variable or `~/.config/openrouter/key` file (same as the CLI). Output shows the model ID (for use with `--model` flag), pricing, context window size, and human-readable name.
+
+Recommended free models for session summarization:
+- `meta-llama/llama-3.3-70b-instruct:free` – High quality, 128K context
+- `mistralai/mistral-small-3.1-24b-instruct:free` – Efficient, 128K context
+- `google/gemma-3-27b-it:free` – Good balance, 131K context
 Uninstall
 ---------
 - pipx: `pipx uninstall codex-summarize-session`
@@ -98,7 +120,7 @@ Usage
 - Generate AI summaries (requires OpenRouter API access):
 
   - `codex-summarize-session summaries generate 1`
-  - `codex-summarize-session summaries generate ~/.codex/sessions/example.jsonl --model x-ai/grok-4-fast:free`
+  - `codex-summarize-session summaries generate ~/.codex/sessions/example.jsonl --model qwen/qwen3-coder:free`
   - `codex-summarize-session summaries generate 1 --stdout --strip-metadata`
 
 - Extract by filepath:
