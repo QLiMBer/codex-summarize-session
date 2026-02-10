@@ -24,5 +24,23 @@ fi
 # Not sourced: source the activate script and replace the current process
 # with a new interactive shell that inherits the activated env.
 . "$ACTIVATE_SCRIPT"
+# Try to preserve the user's preferred shell but fall back to bash when
+# the preferred shell is unknown or likely incompatible with the bash
+# style activate script (e.g., fish).
 SHELL_CMD="${SHELL:-/bin/bash}"
+case "$(basename "$SHELL_CMD")" in
+  bash|zsh)
+    ;;
+  *)
+    # fallback to bash for best compatibility
+    SHELL_CMD="/bin/bash"
+    ;;
+esac
+
+# Try to make the virtualenv prompt visible in the spawned shell. Many shells
+# honour the PS1 environment variable on startup; set a simple prefix so users
+# see the activation state immediately. This may be overridden by the shell's
+# own rc files but works in the common case.
+export PS1="($(basename "$VENV_DIR")) ${PS1:-}\u@\h:\w$ "
+
 exec "$SHELL_CMD" -i
